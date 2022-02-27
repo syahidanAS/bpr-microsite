@@ -1,32 +1,66 @@
 <template>
-  <div id="app">
-    <div id="nav">
-      <router-link to="/">Home</router-link> |
-      <router-link to="/about">About</router-link>
-    </div>
-    <router-view />
-  </div>
+  <v-app>
+    <Sidebar v-if="condition && is_verified === 'true'" />
+    <div v-else></div>
+
+    <v-main>
+      <router-view />
+    </v-main>
+  </v-app>
 </template>
 
-<style>
+<script>
+import Sidebar from "../src/components/SidebarComponent.vue";
+import axios from "axios";
+export default {
+  name: "App",
+  components: {
+    Sidebar,
+  },
+  data() {
+    return {
+      condition: false,
+      is_verified: null,
+    };
+  },
+  mounted() {
+    this.loginChecker();
+  },
+  methods: {
+    loginChecker() {
+      axios
+        .get(`${process.env.VUE_APP_SERVER_URL}me`, {
+          headers: {
+            authorization: `Bearer ${localStorage.getItem("access_token")}`,
+          },
+        })
+        .then((response) => {
+          this.condition = true;
+          this.is_verified = response.data[0].is_verified;
+        })
+        .catch(() => {
+          this.condition = false;
+          this.is_verified = "false";
+        });
+    },
+  },
+};
+</script>
+
+<style scoped>
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@100;200;300;400;500;600;700;800;900&display=swap");
+html,
+body {
+  font-family: "Montserrat", sans-serif;
+}
+
 #app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
+  font-family: "Montserrat", sans-serif;
 }
-
-#nav {
-  padding: 30px;
+.swal-title {
+  font-family: "Montserrat", sans-serif;
 }
-
-#nav a {
-  font-weight: bold;
-  color: #2c3e50;
-}
-
-#nav a.router-link-exact-active {
-  color: #42b983;
+.swal-text {
+  font-family: "Montserrat", sans-serif;
 }
 </style>

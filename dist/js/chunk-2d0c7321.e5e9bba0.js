@@ -1,0 +1,2 @@
+(window["webpackJsonp"]=window["webpackJsonp"]||[]).push([["chunk-2d0c7321"],{"501a":function(e,n,a){"use strict";a.r(n);var t=function(){var e=this,n=e.$createElement;e._self._c;return e._m(0)},c=[function(){var e=this,n=e.$createElement,a=e._self._c||n;return a("div",[a("h1",[e._v("Halamana CMS")])])}],r={name:"CmsPage"},s=r,u=a("2877"),l=Object(u["a"])(s,t,c,!1,null,"8de7ac62",null);n["default"]=l.exports}}]);
+//# sourceMappingURL=chunk-2d0c7321.e5e9bba0.js.map
