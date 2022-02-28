@@ -591,7 +591,7 @@ export default {
       formData.append("class", this.updatePayload.class);
       formData.append("description", this.updatePayload.description);
       formData.append("document", this.file);
-      console.log(formData);
+      
 
       if (this.file.size > 10000 * 10000) {
         Swal.fire({

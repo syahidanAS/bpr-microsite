@@ -12,7 +12,7 @@
           ></avatar>
         </v-avatar>
         <h1 style="color: #caf0f8">{{ user.full_name }}</h1>
-        <v-chip class="ma-2" color="yellow" text-color="black">
+        <v-chip class="ma-2" color="warning">
           {{ user.role }}
         </v-chip>
       </div>
@@ -152,6 +152,7 @@
       </div>
       <h1 class="main-title white--text mx-4">{{ this.mainTitle }}</h1>
       <v-spacer></v-spacer>
+	  <v-btn small color="warning" href="https://www.youtube.com/channel/UCS9CEt1gNnz97LHIMkb_LwQ/videos" target="_blank">Video Tutorial</v-btn>
     </v-app-bar>
 
     <v-app-bar class="hidden-md-and-up" app color="primary">

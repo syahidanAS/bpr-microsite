@@ -170,7 +170,7 @@ export default {
   data() {
     return {
       items: [],
-      totalTeacher: null,
+      totalTeacher: 0,
       totalParent: null,
       totalLR: null,
       role: null,

@@ -47,6 +47,27 @@
               <td>
                 <v-col class="d-flex justify-start">
                   <v-btn
+                    v-if="
+                      user.item.role === 'teacher' ||
+                      user.item.role === 'parent'
+                    "
+                    class="mr-2 mt-2"
+                    small
+                    color="success"
+                    @click="asAdmin(user.item.id, user.item.full_name)"
+                  >
+                    Jadikan Admin
+                  </v-btn>
+                  <v-btn
+                    class="mr-2"
+                    fab
+                    small
+                    color="error"
+                    @click="deleteUser(user.item.id, user.item.full_name)"
+                  >
+                    <v-icon>mdi-delete</v-icon>
+                  </v-btn>
+                  <v-btn
                     class="mr-2"
                     v-if="user.item.is_verified === 'true'"
                     fab
@@ -155,6 +176,17 @@
               </span>
             </p>
             <div class="text--primary">
+              <v-btn
+                v-if="
+                  item.role === 'teacher' || item.role === 'parent'
+                "
+                class="mr-2"
+                small
+                color="success"
+                @click="asAdmin(item.id, item.full_name)"
+              >
+                Jadikan Admin
+              </v-btn>
               <v-btn
                 class="mr-2"
                 fab
@@ -317,6 +349,46 @@ export default {
           this.isLoading = false;
           alert("Terjadi kesalahan!");
         });
+    },
+
+    asAdmin(id, full_name) {
+      Swal.fire({
+        title: `Apakah anda yakin ingin menjadikan ${full_name} sebagai admin?`,
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Ya",
+        cancelButtonText: "Batalkan",
+      }).then((result) => {
+        if (result.isConfirmed) {
+          axios
+            .post(
+              `${process.env.VUE_APP_SERVER_URL}as-admin`,
+              { id: id, role: "admin" },
+
+              {
+                headers: {
+                  authorization: `Bearer ${localStorage.getItem(
+                    "access_token"
+                  )}`,
+                },
+              }
+            )
+            .then(() => {
+              Swal.fire(
+                "Berhasil!",
+                `${full_name} kini menjadi admin!`,
+                "success"
+              );
+              this.getUsers();
+            })
+            .catch(() => {
+              Swal.fire("Yah :(", "Terjadi kesalahan!", "failed");
+              this.getUsers();
+            });
+        }
+      });
     },
   },
 };

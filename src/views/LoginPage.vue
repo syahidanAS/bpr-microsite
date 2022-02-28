@@ -29,6 +29,7 @@
                     name="email"
                     label="Alamat Email"
                     type="email"
+					@keyup.enter="login"
                   ></v-text-field>
                   <v-text-field
                     v-model="user.password"
@@ -41,6 +42,7 @@
                     hint="At least 8 characters"
                     class="input-group--focused"
                     @click:append="show3 = !show3"
+					@keyup.enter="login"
                   ></v-text-field>
                   <router-link
                     class="ml-8"
