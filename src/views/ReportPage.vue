@@ -7,6 +7,7 @@
   >
     <v-container class="px-6">
       <v-select
+	  	v-if="role == 'admin' || role == 'teacher'"
         v-model="select"
         :items="items"
         item-text="state"
@@ -499,12 +500,13 @@ export default {
           });
       } else {
         axios
-          .get(`${process.env.VUE_APP_SERVER_URL}learning-reports`, {
+          .get(`${process.env.VUE_APP_SERVER_URL}learning-reports?role=${localStorage.getItem("role")}&uid=${localStorage.getItem("uid")}`, {
             headers: {
               authorization: `Bearer ${localStorage.getItem("access_token")}`,
             },
           })
           .then((response) => {
+			 
             this.isLoading = false;
             this.docs = response.data;
           })
@@ -553,7 +555,7 @@ export default {
       } else {
         let condition = null;
         if (this.select.abbr === "all") {
-          condition = `${process.env.VUE_APP_SERVER_URL}learning-reports`;
+          condition = `${process.env.VUE_APP_SERVER_URL}learning-reports?role=${localStorage.getItem("role")}&uid=${localStorage.getItem("uid")}`;
         } else {
           condition = `${process.env.VUE_APP_SERVER_URL}reports-by-class?class=${this.select.abbr}`;
         }
