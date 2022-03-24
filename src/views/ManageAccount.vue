@@ -25,6 +25,98 @@
         >
           <template v-slot:item="user">
             <tr>
+              <td>
+                <v-dialog
+                  v-if="user.item.role === 'parent'"
+                  transition="dialog-top-transition"
+                  max-width="600"
+                >
+                  <template v-slot:activator="{ on, attrs }">
+                    <v-btn
+                      color="primary"
+                      v-bind="attrs"
+                      v-on="on"
+                      @click="getPayload(user.item.full_name, user.item.id)"
+                      small
+                    >
+                      Map
+                    </v-btn>
+                  </template>
+                  <template v-slot:default="dialog">
+                    <v-card>
+                      <v-toolbar color="primary" dark
+                        >Map Kelas Untuk Orang Tua :
+                        {{ classMappingPayload.full_name }}</v-toolbar
+                      >
+                      <v-card-text>
+                        <div class="row my-5">
+                          <div class="column" style="background-color: #ffb695">
+                            <div class="my-4 mx-4">
+                              <h2>Unmapped</h2>
+                              <ul v-for="item in unmapPayload" :key="item.id">
+                                <input
+                                  v-model="classPayloadUnmap"
+                                  type="radio"
+                                  id="class"
+                                  name="fav_language"
+                                  :value="item.id"
+                                />
+                                <label
+                                  class="ml-2"
+                                  for="class"
+                                  style="font-size: 11pt"
+                                  ><b>{{ item.class_name }}</b></label
+                                >
+                              </ul>
+                            </div>
+                          </div>
+                          <div class="column" style="background-color: #96d1cd">
+                            <div class="my-4 mx-4">
+                              <h2>Mapped</h2>
+                              <ul
+                                v-for="item in mapPayload.slice().reverse()"
+                                :key="item.id"
+                              >
+                                <input
+                                  v-model="mappedId"
+                                  type="radio"
+                                  id="class2"
+                                  name="class2"
+                                  :value="item.id"
+                                />
+                                <label
+                                  class="ml-2"
+                                  for="class2"
+                                  style="font-size: 11pt"
+                                  ><b>{{ item.class_name }}</b></label
+                                >
+                              </ul>
+                            </div>
+                          </div>
+                          <v-btn class="mt-2" color="primary" @click="map()"
+                            >Map</v-btn
+                          >
+                          <v-btn
+                            class="mt-2 mx-2"
+                            color="warning"
+                            @click="unmap()"
+                            >Unmap</v-btn
+                          >
+                        </div>
+                      </v-card-text>
+                      <v-card-actions class="justify-end">
+                        <v-btn color="primary" @click="dialog.value = false"
+                          >Tutup</v-btn
+                        >
+                      </v-card-actions>
+                    </v-card>
+                  </template>
+                </v-dialog>
+
+                <v-btn v-else class="ml-2 mt-2" small color="danger" disabled>
+                  Tidak tersedia
+                </v-btn>
+              </td>
               <td>{{ user.item.full_name }}</td>
               <!-- <td>{{ user.item.email }}</td>
             <td>{{ user.item.address }}</td> -->
@@ -46,18 +138,6 @@
               </td>
               <td>
                 <v-col class="d-flex justify-start">
-                  <v-btn
-                    v-if="
-                      user.item.role === 'teacher' ||
-                      user.item.role === 'parent'
-                    "
-                    class="mr-2 mt-2"
-                    small
-                    color="success"
-                    @click="asAdmin(user.item.id, user.item.full_name)"
-                  >
-                    Jadikan Admin
-                  </v-btn>
                   <v-btn
                     class="mr-2"
                     fab
@@ -93,6 +173,20 @@
                   <v-btn v-else fab small color="success" disabled>
                     <v-icon>mdi-check</v-icon>
                   </v-btn>
+                  <v-btn
+                    v-if="
+                      user.item.role === 'teacher' ||
+                      user.item.role === 'parent'
+                    "
+                    class="ml-2 mt-2"
+                    small
+                    color="success"
+                    @click="asAdmin(user.item.id, user.item.full_name)"
+                  >
+                    Jadikan Admin
+                  </v-btn>
+
+				  
                 </v-col>
               </td>
             </tr>
@@ -177,9 +271,7 @@
             </p>
             <div class="text--primary">
               <v-btn
-                v-if="
-                  item.role === 'teacher' || item.role === 'parent'
-                "
+                v-if="item.role === 'teacher' || item.role === 'parent'"
                 class="mr-2"
                 small
                 color="success"
@@ -187,6 +279,7 @@
               >
                 Jadikan Admin
               </v-btn>
+			  
               <v-btn
                 class="mr-2"
                 fab
@@ -222,6 +315,8 @@
               <v-btn v-else fab small color="success" disabled>
                 <v-icon>mdi-check</v-icon>
               </v-btn>
+
+			  
             </div>
           </v-card-text>
         </v-card>
@@ -241,8 +336,9 @@ export default {
       search: "",
       username: null,
       headers: [
+        { text: "Map", value: "map" },
         {
-          text: "Full Name",
+          text: "Nama Lengkap",
           align: "start",
           sortable: false,
           value: "full_name",
@@ -254,12 +350,110 @@ export default {
       ],
       users: [],
       isLoading: false,
+      classMappingPayload: [
+        {
+          uid: null,
+          full_name: null,
+        },
+      ],
+      mapPayload: [],
+      unmapPayload: [],
+      classPayloadUnmap: null,
+      mappedId: null,
     };
   },
   mounted() {
     this.getUsers();
   },
   methods: {
+    map() {
+      let payload = {
+        uid: parseInt(this.classMappingPayload.uid),
+        classid: parseInt(this.classPayloadUnmap),
+      };
+
+      axios
+        .post(`${process.env.VUE_APP_SERVER_URL}add-user-class`, payload, {
+          headers: {
+            authorization: `Bearer ${localStorage.getItem("access_token")}`,
+          },
+        })
+        .then(() => {
+          this.showUserClass();
+        })
+        .catch((error) => {
+          if (error.response.status == 400) {
+            alert("Tidak dapat mapping kelas lebih dari satu kali!");
+          } else {
+            alert("Terjadi kesalahan!");
+          }
+        });
+    },
+    unmap() {
+      axios
+        .delete(
+          `${process.env.VUE_APP_SERVER_URL}delete-mapped?id=${this.mappedId}`,
+          {
+            headers: {
+              authorization: `Bearer ${localStorage.getItem("access_token")}`,
+            },
+          }
+        )
+        .then(() => {
+          this.showUserClass();
+        })
+        .catch(() => {
+          alert("Terjadi Kesalahan!");
+        });
+    },
+    getPayload(full_name, uid) {
+      this.classMappingPayload.uid = uid;
+      this.classMappingPayload.full_name = full_name;
+
+      axios
+        .get(`${process.env.VUE_APP_SERVER_URL}all-class`, {
+          headers: {
+            authorization: `Bearer ${localStorage.getItem("access_token")}`,
+          },
+        })
+        .then((response) => {
+          this.unmapPayload = response.data.data;
+        })
+        .catch(() => {
+          alert("Terjadi kesalahan!");
+        });
+
+      axios
+        .get(`${process.env.VUE_APP_SERVER_URL}get-user-class?uid=${uid}`, {
+          headers: {
+            authorization: `Bearer ${localStorage.getItem("access_token")}`,
+          },
+        })
+        .then((response) => {
+          this.mapPayload = response.data.data;
+        })
+        .catch(() => {
+          alert("Terjadi kesalahan!");
+        });
+    },
+
+    showUserClass() {
+      axios
+        .get(
+          `${process.env.VUE_APP_SERVER_URL}get-user-class?uid=${this.classMappingPayload.uid}`,
+          {
+            headers: {
+              authorization: `Bearer ${localStorage.getItem("access_token")}`,
+            },
+          }
+        )
+        .then((response) => {
+          this.mapPayload = response.data.data;
+        })
+        .catch(() => {
+          alert("Terjadi kesalahan!");
+        });
+    },
     deleteUser(id, full_name) {
       Swal.fire({
         title: "Apakah anda yakin?",
@@ -394,4 +588,16 @@ export default {
 };
 </script>
 
-<style lang="scss" scoped></style>
+<style scoped>
+/* Set additional styling options for the columns*/
+.column {
+  float: left;
+  width: 50%;
+}
+
+.row:after {
+  content: "";
+  display: table;
+  clear: both;
+}
+</style>
